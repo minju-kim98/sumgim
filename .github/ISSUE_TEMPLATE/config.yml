@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 토론 / 질문
+    url: https://github.com/minju-kim98/sumgim/discussions
+    about: 버그/기능 제안이 아닌 사용법 질문이나 자유 토론은 Discussions에 부탁드려요.
+  - name: 📋 PRD (제품 기획)
+    url: https://github.com/minju-kim98/sumgim/blob/master/docs/meeting-mode-PRD.md
+    about: 프로젝트 의도와 로드맵을 보고 싶다면.

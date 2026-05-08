@@ -1,0 +1,80 @@
+name: 🐞 버그 리포트
+description: 동작이 이상하거나 충돌이 났을 때
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        버그 제보 감사합니다 🙏
+        가능한 한 재현 절차와 환경 정보를 같이 적어주시면 빠르게 확인할 수 있어요.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 무슨 일이 일어났나요?
+      description: 한두 문장으로 증상을 설명해주세요.
+      placeholder: 회의 모드를 켜도 Mattermost 상태가 바뀌지 않습니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 재현 절차
+      description: 가능하면 1, 2, 3 단계로
+      placeholder: |
+        1. 트레이 → 회의 모드 ON
+        2. Mattermost 웹에서 본인 상태 확인
+        3. (관찰) 상태가 그대로 Online
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 기대한 동작
+      placeholder: 회의 모드 ON 시 Mattermost가 DND로 바뀌어야 합니다.
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 실제 동작 / 에러 메시지
+      description: 콘솔 로그나 토스트 메시지가 있다면 같이 붙여주세요.
+
+  - type: input
+    id: sumgim_version
+    attributes:
+      label: 숨김 버전
+      placeholder: v0.4.0 (트레이 → 설정 → 정보)
+    validations:
+      required: true
+
+  - type: input
+    id: windows_version
+    attributes:
+      label: Windows 버전
+      placeholder: Windows 11 23H2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: trigger
+    attributes:
+      label: 어떤 트리거를 사용하셨나요?
+      multiple: true
+      options:
+        - 디스플레이 복제 자동 감지
+        - PowerPoint 슬라이드쇼 자동 감지
+        - 전체화면 앱 자동 감지
+        - 글로벌 단축키 (수동)
+        - 트레이 클릭 (수동)
+        - Floating 토글 버튼
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: 그 외 정보
+      description: 스크린샷, GIF, 모니터 구성, 메신저 종류 등 도움이 될 만한 모든 것

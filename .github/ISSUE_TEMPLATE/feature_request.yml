@@ -1,0 +1,47 @@
+name: ✨ 기능 제안
+description: 있으면 좋겠다 싶은 새 기능 / 개선
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        제안 감사합니다 🙌
+        "왜 필요한가"를 같이 적어주시면 우선순위를 정할 때 큰 도움이 됩니다.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 어떤 문제를 풀고 싶으신가요?
+      description: 기능 자체보다 **상황과 페인포인트**를 먼저 적어주세요.
+      placeholder: |
+        외부 모니터에 발표하는데 사내 그룹웨어 알림은 안 띄우고 싶지만,
+        팀장님 DM은 받고 싶습니다. 현재는 전체 ON/OFF만 가능해서…
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 어떤 형태면 좋을까요?
+      description: 떠오르는 UX/동작 (확정안 아니어도 OK)
+      placeholder: |
+        앱별 화이트리스트 추가, 또는 "VIP 사람" 지정 기능
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 다른 도구로 우회해본 적 있나요?
+      placeholder: |
+        Windows Focus의 우선순위 알림 기능을 써봤는데 메신저 상태는 안 바뀜
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 본인에게 얼마나 중요한가요?
+      options:
+        - 있으면 좋음 (있어도 그만, 없어도 그만)
+        - 자주 답답함 (한 달에 여러 번 겪음)
+        - 매주 사고로 이어짐 (이거 때문에 도구를 못 씀)
+    validations:
+      required: true
