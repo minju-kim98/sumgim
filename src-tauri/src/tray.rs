@@ -5,7 +5,7 @@ use tauri::{
     image::Image,
     menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem},
     tray::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent},
-    AppHandle, Manager,
+    AppHandle, Emitter, Manager,
 };
 
 use crate::commands;
@@ -17,7 +17,10 @@ const TRAY_ID: &str = "sumgim-tray";
 // Menu item IDs.
 const ID_TOGGLE: &str = "toggle_meeting";
 const ID_OPEN_SETTINGS: &str = "open_settings";
+const ID_CHECK_UPDATE: &str = "check_update";
 const ID_QUIT: &str = "quit";
+
+pub const EVENT_TRIGGER_UPDATE_CHECK: &str = "trigger-update-check";
 
 pub fn build(app: &AppHandle, _state: &Arc<AppState>) -> Result<TrayIcon> {
     let menu = build_menu(app, false)?;
@@ -46,10 +49,12 @@ fn build_menu(app: &AppHandle, active: bool) -> Result<Menu<tauri::Wry>> {
         None::<&str>,
     )?;
     let settings = MenuItem::with_id(app, ID_OPEN_SETTINGS, "설정 열기", true, None::<&str>)?;
+    let check_update =
+        MenuItem::with_id(app, ID_CHECK_UPDATE, "업데이트 확인", true, None::<&str>)?;
     let sep = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, ID_QUIT, "종료", true, None::<&str>)?;
 
-    Menu::with_items(app, &[&toggle, &settings, &sep, &quit]).map_err(Into::into)
+    Menu::with_items(app, &[&toggle, &settings, &check_update, &sep, &quit]).map_err(Into::into)
 }
 
 fn handle_menu_event(app: &AppHandle, id: &str) {
@@ -64,6 +69,10 @@ fn handle_menu_event(app: &AppHandle, id: &str) {
         }
         ID_OPEN_SETTINGS => {
             show_settings(app);
+        }
+        ID_CHECK_UPDATE => {
+            show_settings(app);
+            let _ = app.emit(EVENT_TRIGGER_UPDATE_CHECK, ());
         }
         ID_QUIT => {
             app.exit(0);

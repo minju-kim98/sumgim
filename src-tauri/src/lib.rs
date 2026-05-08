@@ -165,6 +165,18 @@ fn setup(app: AppHandle, state: Arc<AppState>) -> Result<(), Box<dyn std::error:
         .name("sumgim-timeout".into())
         .spawn(move || timeout_watchdog(app_for_timeout, state_for_timeout))?;
 
+    // 8b) Background updater poll: 앱 시작 30초 후 1회, 이후 24시간마다 체크.
+    //     새 버전이 있으면 토스트로 알림. 다운로드/설치는 사용자가 트레이 →
+    //     "업데이트 확인" 또는 설정 화면에서 명시적으로 트리거.
+    let app_for_updater = app.clone();
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(Duration::from_secs(30)).await;
+        loop {
+            background_update_check(&app_for_updater).await;
+            tokio::time::sleep(Duration::from_secs(24 * 60 * 60)).await;
+        }
+    });
+
     // 9) Final tray refresh to reflect post-recovery state.
     tray::refresh(&app);
 
@@ -288,6 +300,28 @@ fn timeout_watchdog(app: AppHandle, state: Arc<AppState>) {
                 &format!("{timeout_minutes}분 타임아웃이 지났습니다"),
             );
         }
+    }
+}
+
+async fn background_update_check(app: &AppHandle) {
+    use tauri_plugin_updater::UpdaterExt;
+    let updater = match app.updater() {
+        Ok(u) => u,
+        Err(e) => {
+            eprintln!("[sumgim] updater handle init failed: {e:#}");
+            return;
+        }
+    };
+    match updater.check().await {
+        Ok(Some(update)) => {
+            let body = format!(
+                "v{} 사용 가능. 트레이 → '업데이트 확인'에서 받을 수 있습니다.",
+                update.version
+            );
+            toast(app, "숨김: 업데이트 가능", &body);
+        }
+        Ok(None) => {}
+        Err(e) => eprintln!("[sumgim] update check failed: {e:#}"),
     }
 }
 

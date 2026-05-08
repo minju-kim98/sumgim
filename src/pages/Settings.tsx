@@ -9,6 +9,7 @@ import {
   getMessengerCreds,
   getSettings,
   onMeetingChanged,
+  onUpdateCheckTriggered,
   setAutostart,
   setFloatingVisible,
   setShortcut as apiSetShortcut,
@@ -84,6 +85,7 @@ export default function Settings() {
   >({ kind: "idle" });
   const recordingRef = useRef(recording);
   recordingRef.current = recording;
+  const checkUpdateRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -95,6 +97,16 @@ export default function Settings() {
       const c = await getMessengerCreds();
       setCreds(c);
       unlisten = await onMeetingChanged((state) => setActive(state.active));
+    })();
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      unlisten = await onUpdateCheckTriggered(() => checkUpdateRef.current());
     })();
     return () => {
       unlisten?.();
@@ -236,6 +248,7 @@ export default function Settings() {
       setUpdateStatus({ kind: "error", message: String(e) });
     }
   };
+  checkUpdateRef.current = onCheckUpdate;
 
   const onInstallUpdate = async () => {
     if (updateStatus.kind !== "available") return;
@@ -719,13 +732,38 @@ export default function Settings() {
               </div>
             )}
             {updateStatus.kind === "downloading" && (
-              <div className="desc" style={{ marginTop: 6 }}>
-                다운로드 중…{" "}
-                {updateStatus.total
-                  ? `${Math.round(
-                      (updateStatus.downloaded / updateStatus.total) * 100,
-                    )}%`
-                  : `${(updateStatus.downloaded / 1024 / 1024).toFixed(1)} MB`}
+              <div style={{ marginTop: 6 }}>
+                <div className="desc">
+                  다운로드 중…{" "}
+                  {updateStatus.total
+                    ? `${Math.round(
+                        (updateStatus.downloaded / updateStatus.total) * 100,
+                      )}%`
+                    : `${(updateStatus.downloaded / 1024 / 1024).toFixed(1)} MB`}
+                </div>
+                {updateStatus.total && (
+                  <div
+                    style={{
+                      height: 6,
+                      background: "var(--border)",
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      marginTop: 4,
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${Math.min(
+                          100,
+                          (updateStatus.downloaded / updateStatus.total) * 100,
+                        )}%`,
+                        height: "100%",
+                        background: "var(--success, #4ade80)",
+                        transition: "width 0.2s ease",
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             )}
             {updateStatus.kind === "ready" && (

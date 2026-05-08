@@ -93,3 +93,7 @@ export function onMeetingChanged(
 ): Promise<UnlistenFn> {
   return listen<MeetingState>("meeting-changed", (event) => cb(event.payload));
 }
+
+export function onUpdateCheckTriggered(cb: () => void): Promise<UnlistenFn> {
+  return listen<null>("trigger-update-check", () => cb());
+}
