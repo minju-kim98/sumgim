@@ -39,6 +39,44 @@ src/             React + TypeScript 프론트엔드 (설정 화면, Floating 토
 src-tauri/       Rust 백엔드 (Win32 DND, 디스플레이 모니터, 트레이, 단축키)
 ```
 
+## 자동 업데이트 셋업 (배포자용)
+
+자동 업데이트는 **서명 키 페어**가 있어야 작동합니다. 1회만 셋업하면 됩니다.
+
+### 1. 키 페어 생성
+
+```powershell
+npm run tauri signer generate -- -w sumgim.key
+```
+
+- `sumgim.key` (개인키) — **저장소에 커밋 금지**, 안전하게 보관
+- `sumgim.key.pub` (공개키) — 이 파일 내용을 `src-tauri/tauri.conf.json`의 `plugins.updater.pubkey`에 붙여넣기
+
+### 2. `tauri.conf.json` 채우기
+
+- `plugins.updater.endpoints[0]`의 `OWNER/REPO`를 실제 GitHub 저장소로 교체
+- `plugins.updater.pubkey`를 위에서 만든 `sumgim.key.pub` 내용으로 교체
+
+### 3. GitHub Secrets 등록
+
+저장소 **Settings → Secrets and variables → Actions → New repository secret**
+
+| 이름 | 값 |
+|------|-----|
+| `TAURI_SIGNING_PRIVATE_KEY` | `sumgim.key` 파일 **내용 전체** |
+| `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` | 키 생성 시 입력한 암호 (없으면 빈 값) |
+
+### 4. 릴리스
+
+```powershell
+git tag v0.2.0
+git push origin v0.2.0
+```
+
+워크플로가 빌드 → 서명 → `latest.json` 포함해 Draft Release 생성. 검토 후 **Publish**하면 기존 사용자의 설정 화면에서 업데이트가 보입니다.
+
+> 키를 잃으면 새 키 페어로 재서명한 빌드를 기존 사용자가 받을 수 없습니다 (서명 검증 실패). 백업 필수.
+
 ## v0.3+ 로드맵
 
 - Mattermost / Slack status 연동

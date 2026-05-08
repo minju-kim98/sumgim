@@ -45,6 +45,8 @@ jobs:
         uses: tauri-apps/tauri-action@v0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         with:
           tagName: ${{ github.event.inputs.tag || github.ref_name }}
           releaseName: "Sumgim ${{ github.event.inputs.tag || github.ref_name }}"
@@ -55,7 +57,10 @@ jobs:
 
             > 코드 서명이 없는 빌드라 SmartScreen 경고가 뜰 수 있습니다.
             > "추가 정보 → 실행"으로 진행하세요.
+
+            ## 자동 업데이트
+            v0.2.0 이상 설치본은 설정 화면 → 업데이트 섹션에서 이 릴리스를 자동으로 받아 설치할 수 있습니다.
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: false
+          includeUpdaterJson: true
           args: --target x86_64-pc-windows-msvc

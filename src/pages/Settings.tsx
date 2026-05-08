@@ -1,4 +1,6 @@
 import { useEffect, useRef, useState } from "react";
+import { check, type Update } from "@tauri-apps/plugin-updater";
+import { relaunch } from "@tauri-apps/plugin-process";
 import logo from "../assets/logo.png";
 import {
   AppSettings,
@@ -71,6 +73,15 @@ export default function Settings() {
   const [mmTesting, setMmTesting] = useState(false);
   const [slackTesting, setSlackTesting] = useState(false);
   const [autostartError, setAutostartError] = useState<string | null>(null);
+  const [updateStatus, setUpdateStatus] = useState<
+    | { kind: "idle" }
+    | { kind: "checking" }
+    | { kind: "latest"; current: string }
+    | { kind: "available"; update: Update }
+    | { kind: "downloading"; downloaded: number; total: number | null }
+    | { kind: "ready" }
+    | { kind: "error"; message: string }
+  >({ kind: "idle" });
   const recordingRef = useRef(recording);
   recordingRef.current = recording;
 
@@ -210,6 +221,44 @@ export default function Settings() {
     }
     const s = await updateSettings({ mattermost_enabled: checked });
     setSettings(s);
+  };
+
+  const onCheckUpdate = async () => {
+    setUpdateStatus({ kind: "checking" });
+    try {
+      const update = await check();
+      if (update) {
+        setUpdateStatus({ kind: "available", update });
+      } else {
+        setUpdateStatus({ kind: "latest", current: "최신" });
+      }
+    } catch (e) {
+      setUpdateStatus({ kind: "error", message: String(e) });
+    }
+  };
+
+  const onInstallUpdate = async () => {
+    if (updateStatus.kind !== "available") return;
+    const update = updateStatus.update;
+    setUpdateStatus({ kind: "downloading", downloaded: 0, total: null });
+    try {
+      let downloaded = 0;
+      let total: number | null = null;
+      await update.downloadAndInstall((event) => {
+        if (event.event === "Started") {
+          total = event.data.contentLength ?? null;
+          setUpdateStatus({ kind: "downloading", downloaded: 0, total });
+        } else if (event.event === "Progress") {
+          downloaded += event.data.chunkLength;
+          setUpdateStatus({ kind: "downloading", downloaded, total });
+        } else if (event.event === "Finished") {
+          setUpdateStatus({ kind: "ready" });
+        }
+      });
+      await relaunch();
+    } catch (e) {
+      setUpdateStatus({ kind: "error", message: String(e) });
+    }
   };
 
   const onToggleSlack = async (checked: boolean) => {
@@ -637,6 +686,82 @@ export default function Settings() {
           </div>
           <div className="desc" style={{ fontSize: 11, color: "var(--muted)" }}>
             이모지 이름만 입력 (예: calendar, computer, coffee)
+          </div>
+        </div>
+      </section>
+
+      <section className="section">
+        <h2>업데이트</h2>
+        <div className="row">
+          <div className="label">
+            <div className="name">자동 업데이트</div>
+            <div className="desc">
+              GitHub Releases에서 최신 빌드를 확인하고 백그라운드로 받아서
+              재시작 시 적용합니다.
+            </div>
+            {updateStatus.kind === "available" && (
+              <div className="desc" style={{ marginTop: 6 }}>
+                <strong>v{updateStatus.update.version}</strong> 사용 가능
+                {updateStatus.update.body && (
+                  <pre
+                    style={{
+                      whiteSpace: "pre-wrap",
+                      fontSize: 11,
+                      color: "var(--muted)",
+                      margin: "6px 0 0",
+                      maxHeight: 120,
+                      overflowY: "auto",
+                    }}
+                  >
+                    {updateStatus.update.body}
+                  </pre>
+                )}
+              </div>
+            )}
+            {updateStatus.kind === "downloading" && (
+              <div className="desc" style={{ marginTop: 6 }}>
+                다운로드 중…{" "}
+                {updateStatus.total
+                  ? `${Math.round(
+                      (updateStatus.downloaded / updateStatus.total) * 100,
+                    )}%`
+                  : `${(updateStatus.downloaded / 1024 / 1024).toFixed(1)} MB`}
+              </div>
+            )}
+            {updateStatus.kind === "ready" && (
+              <div className="desc" style={{ marginTop: 6 }}>
+                설치 준비 완료. 곧 재시작됩니다.
+              </div>
+            )}
+            {updateStatus.kind === "latest" && (
+              <div className="desc" style={{ marginTop: 6, color: "var(--success)" }}>
+                ✓ 최신 버전입니다.
+              </div>
+            )}
+            {updateStatus.kind === "error" && (
+              <div className="desc" style={{ marginTop: 6, color: "var(--danger)" }}>
+                ✗ {updateStatus.message}
+              </div>
+            )}
+          </div>
+          <div style={{ display: "flex", gap: 8 }}>
+            {updateStatus.kind === "available" ? (
+              <button className="btn primary" onClick={onInstallUpdate}>
+                다운로드 및 설치
+              </button>
+            ) : (
+              <button
+                className="btn"
+                onClick={onCheckUpdate}
+                disabled={
+                  updateStatus.kind === "checking" ||
+                  updateStatus.kind === "downloading" ||
+                  updateStatus.kind === "ready"
+                }
+              >
+                {updateStatus.kind === "checking" ? "확인 중…" : "업데이트 확인"}
+              </button>
+            )}
           </div>
         </div>
       </section>

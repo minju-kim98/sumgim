@@ -46,6 +46,7 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "createUpdaterArtifacts": true,
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
@@ -54,5 +55,16 @@
       "icons/icon.png"
     ]
   },
-  "plugins": {}
+  "plugins": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://github.com/minju-kim98/sumgim/releases/latest/download/latest.json"
+      ],
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDQ3NUVCRDM4MURGRDhFNjUKUldSbGp2MGRPTDFlUitFSWgrdjhKR3BScFJMa2sxQVJ3NG1CemhGRjh6am5wNUh1aGR6NG1YdnYK",
+      "windows": {
+        "installMode": "passive"
+      }
+    }
+  }
 }

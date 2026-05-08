@@ -31,3 +31,7 @@ src-tauri/WixTools
 
 # Tauri build
 src-tauri/Cargo.lock
+
+# keys
+sumgim.key
+sumgim.key.pub
