@@ -870,7 +870,7 @@ export default function Settings() {
         <h2>정보</h2>
         <div className="row">
           <div className="label">
-            <div className="name">숨김 v0.3.0</div>
+            <div className="name">숨김 v0.4.0</div>
             <div className="desc">Author · Minju</div>
           </div>
           <a
