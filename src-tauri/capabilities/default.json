@@ -37,6 +37,15 @@
     "autostart:allow-is-enabled",
     "updater:default",
     "process:default",
-    "process:allow-restart"
+    "process:allow-restart",
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        { "url": "https://**" },
+        { "url": "http://**" },
+        { "url": "mattermost://**" },
+        { "url": "slack://**" }
+      ]
+    }
   ]
 }

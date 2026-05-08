@@ -12,9 +12,9 @@ use crate::state::{
     AppSettings, AppState, MeetingSource, MeetingState, KEY_AUTOSTART, KEY_AUTO_DETECT_CLONE,
     KEY_DETECT_FULLSCREEN, KEY_DETECT_PPT, KEY_MATTERMOST_ENABLED, KEY_MATTERMOST_TOKEN,
     KEY_MATTERMOST_URL, KEY_MEETING_ACTIVE, KEY_MM_STATUS_EMOJI, KEY_MM_STATUS_TEXT,
-    KEY_SHORTCUT, KEY_SHOW_FLOATING, KEY_SLACK_ENABLED, KEY_SLACK_STATUS_EMOJI,
-    KEY_SLACK_STATUS_TEXT, KEY_SLACK_TOKEN, KEY_SUSPEND_KAKAOTALK, KEY_TIMEOUT_MINUTES,
-    KEY_TOAST_ENABLED_BACKUP, STORE_FILE,
+    KEY_ONBOARDING_DONE, KEY_SHORTCUT, KEY_SHOW_FLOATING, KEY_SLACK_ENABLED,
+    KEY_SLACK_STATUS_EMOJI, KEY_SLACK_STATUS_TEXT, KEY_SLACK_TOKEN, KEY_SUSPEND_KAKAOTALK,
+    KEY_TIMEOUT_MINUTES, KEY_TOAST_ENABLED_BACKUP, STORE_FILE,
 };
 
 /// Map any `anyhow::Error` into a String so Tauri commands can return it as a
@@ -34,6 +34,7 @@ pub struct SettingsPatch {
     pub detect_fullscreen: Option<bool>,
     pub mattermost_enabled: Option<bool>,
     pub slack_enabled: Option<bool>,
+    pub onboarding_done: Option<bool>,
 }
 
 #[tauri::command]
@@ -80,6 +81,9 @@ pub fn update_settings(
         }
         if let Some(v) = patch.slack_enabled {
             s.slack_enabled = v;
+        }
+        if let Some(v) = patch.onboarding_done {
+            s.onboarding_done = v;
         }
     }
     persist_settings(&app, &state).map_err(to_string_err)?;
@@ -187,6 +191,19 @@ pub fn set_floating_visible(
 #[tauri::command]
 pub fn quit_app(app: AppHandle) {
     app.exit(0);
+}
+
+#[tauri::command]
+pub fn complete_onboarding(
+    app: AppHandle,
+    state: State<'_, Arc<AppState>>,
+) -> Result<AppSettings, String> {
+    {
+        let mut s = state.settings.write();
+        s.onboarding_done = true;
+    }
+    persist_settings(&app, &state).map_err(to_string_err)?;
+    Ok(state.settings.read().clone())
 }
 
 // ───────────────── helpers reused from other modules ─────────────────
@@ -382,6 +399,18 @@ fn emit_missed_toast(app: &tauri::AppHandle, items: &[(String, u64)]) {
         .title("회의 끝! 놓친 알림")
         .body(&body)
         .show();
+
+    let payload: Vec<serde_json::Value> = items
+        .iter()
+        .map(|(name, n)| serde_json::json!({ "name": name, "count": n }))
+        .collect();
+    let _ = app.emit("missed-alerts", payload);
+
+    if let Some(win) = app.get_webview_window("main") {
+        let _ = win.show();
+        let _ = win.unminimize();
+        let _ = win.set_focus();
+    }
 }
 
 /// Write the current settings + meeting_active flag + toast backup into the
@@ -420,6 +449,10 @@ pub fn persist_settings(app: &AppHandle, state: &Arc<AppState>) -> anyhow::Resul
         serde_json::json!(settings.slack_enabled),
     );
     store.set(KEY_AUTOSTART, serde_json::json!(settings.autostart));
+    store.set(
+        KEY_ONBOARDING_DONE,
+        serde_json::json!(settings.onboarding_done),
+    );
     let creds = state.messenger_creds.read().clone();
     store.set(KEY_MATTERMOST_URL, serde_json::json!(creds.mattermost_url));
     store.set(
@@ -507,6 +540,11 @@ pub fn load_settings(app: &AppHandle, state: &Arc<AppState>) -> anyhow::Result<b
     if let Some(v) = store.get(KEY_AUTOSTART) {
         if let Some(v) = v.as_bool() {
             s.autostart = v;
+        }
+    }
+    if let Some(v) = store.get(KEY_ONBOARDING_DONE) {
+        if let Some(v) = v.as_bool() {
+            s.onboarding_done = v;
         }
     }
     let crash_recovery = store

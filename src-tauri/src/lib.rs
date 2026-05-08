@@ -29,6 +29,7 @@ pub fn run() {
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_autostart::init(
             tauri_plugin_autostart::MacosLauncher::LaunchAgent,
             Some(vec![]),
@@ -65,6 +66,7 @@ pub fn run() {
             commands::update_messenger_creds,
             commands::test_mattermost_connection,
             commands::test_slack_connection,
+            commands::complete_onboarding,
         ])
         .on_window_event(|window, event| {
             // Main window close = hide to tray instead of quit.
@@ -97,9 +99,15 @@ fn setup(app: AppHandle, state: Arc<AppState>) -> Result<(), Box<dyn std::error:
         eprintln!("could not register initial shortcut: {e:#}");
     }
 
-    // 4) Hide the main window at startup — app launches silent, tray only.
+    // 4) Show the main window only on first launch (onboarding wizard); otherwise launch silent.
     if let Some(win) = app.get_webview_window("main") {
-        let _ = win.hide();
+        if !state.settings.read().onboarding_done {
+            let _ = win.show();
+            let _ = win.unminimize();
+            let _ = win.set_focus();
+        } else {
+            let _ = win.hide();
+        }
     }
 
     // 5) Floating window visibility follows the stored preference.
@@ -147,6 +155,15 @@ fn setup(app: AppHandle, state: Arc<AppState>) -> Result<(), Box<dyn std::error:
         let cloning: bool = serde_json::from_str(event.payload()).unwrap_or(false);
         on_clone_changed(&app_for_listener, &state_for_listener, cloning);
     });
+
+    let app_for_external = app.clone();
+    let state_for_external = state.clone();
+    app.listen(
+        display_monitor::EVENT_EXTERNAL_DISPLAY_ATTACHED,
+        move |_event| {
+            on_external_display_attached(&app_for_external, &state_for_external);
+        },
+    );
 
     trigger_monitor::spawn(app.clone(), state.clone());
 
@@ -234,6 +251,20 @@ fn on_clone_changed(app: &AppHandle, state: &Arc<AppState>, cloning: bool) {
             toast(app, "숨김: 회의 모드 자동 해제", "디스플레이 복제가 해제되었습니다");
         }
     }
+}
+
+fn on_external_display_attached(app: &AppHandle, state: &Arc<AppState>) {
+    let meeting_active = state.meeting.read().active;
+    if meeting_active {
+        // Already in meeting mode — no need to suggest.
+        return;
+    }
+    let shortcut = state.settings.read().shortcut.clone();
+    toast(
+        app,
+        "숨김: 외부 모니터 연결됨",
+        &format!("회의 시작이라면 {shortcut}로 회의 모드를 켜세요."),
+    );
 }
 
 fn on_trigger_changed(app: &AppHandle, state: &Arc<AppState>, active: bool) {

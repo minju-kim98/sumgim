@@ -1,14 +1,17 @@
 import { useEffect, useRef, useState } from "react";
 import { check, type Update } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
+import { open as openExternal } from "@tauri-apps/plugin-shell";
 import logo from "../assets/logo.png";
 import {
   AppSettings,
   MessengerCreds,
+  MissedAlertItem,
   getMeetingState,
   getMessengerCreds,
   getSettings,
   onMeetingChanged,
+  onMissedAlerts,
   onUpdateCheckTriggered,
   setAutostart,
   setFloatingVisible,
@@ -74,6 +77,7 @@ export default function Settings() {
   const [mmTesting, setMmTesting] = useState(false);
   const [slackTesting, setSlackTesting] = useState(false);
   const [autostartError, setAutostartError] = useState<string | null>(null);
+  const [missedAlerts, setMissedAlerts] = useState<MissedAlertItem[] | null>(null);
   const [updateStatus, setUpdateStatus] = useState<
     | { kind: "idle" }
     | { kind: "checking" }
@@ -107,6 +111,16 @@ export default function Settings() {
     let unlisten: (() => void) | undefined;
     (async () => {
       unlisten = await onUpdateCheckTriggered(() => checkUpdateRef.current());
+    })();
+    return () => {
+      unlisten?.();
+    };
+  }, []);
+
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+    (async () => {
+      unlisten = await onMissedAlerts((items) => setMissedAlerts(items));
     })();
     return () => {
       unlisten?.();
@@ -235,6 +249,25 @@ export default function Settings() {
     setSettings(s);
   };
 
+  const openMissed = async (name: string) => {
+    try {
+      if (name === "Mattermost") {
+        const url = creds.mattermost_url?.trim();
+        if (url) {
+          await openExternal(url);
+        }
+      } else if (name === "Slack") {
+        try {
+          await openExternal("slack://open");
+        } catch {
+          await openExternal("https://slack.com/");
+        }
+      }
+    } catch (e) {
+      console.error("open external failed:", e);
+    }
+  };
+
   const onCheckUpdate = async () => {
     setUpdateStatus({ kind: "checking" });
     try {
@@ -292,6 +325,35 @@ export default function Settings() {
           <p className="sub">회의 모드 자동화</p>
         </div>
       </header>
+
+      {missedAlerts && missedAlerts.length > 0 && (
+        <section
+          className="section"
+          style={{
+            borderLeft: "3px solid var(--accent, #6366f1)",
+            background: "var(--accent-bg, rgba(99, 102, 241, 0.06))",
+          }}
+        >
+          <h2>회의 종료 — 놓친 알림</h2>
+          {missedAlerts.map((item) => (
+            <div className="row" key={item.name}>
+              <div className="label">
+                <div className="name">
+                  {item.name}: {item.count}개
+                </div>
+              </div>
+              <button className="btn primary" onClick={() => openMissed(item.name)}>
+                {item.name} 열기
+              </button>
+            </div>
+          ))}
+          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 8 }}>
+            <button className="btn" onClick={() => setMissedAlerts(null)}>
+              닫기
+            </button>
+          </div>
+        </section>
+      )}
 
       <section className="section">
         <h2>회의 모드</h2>

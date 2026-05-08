@@ -29,6 +29,7 @@ pub const KEY_MM_STATUS_TEXT: &str = "mattermost_status_text";
 pub const KEY_SLACK_STATUS_EMOJI: &str = "slack_status_emoji";
 pub const KEY_SLACK_STATUS_TEXT: &str = "slack_status_text";
 pub const KEY_AUTOSTART: &str = "autostart";
+pub const KEY_ONBOARDING_DONE: &str = "onboarding_done";
 
 /// User-visible settings. `meeting_active` mirrors runtime state but is persisted for
 /// crash recovery — if we crash while ON, the next launch should release DND.
@@ -45,6 +46,7 @@ pub struct AppSettings {
     pub mattermost_enabled: bool,
     pub slack_enabled: bool,
     pub autostart: bool,
+    pub onboarding_done: bool,
 }
 
 impl Default for AppSettings {
@@ -61,6 +63,7 @@ impl Default for AppSettings {
             mattermost_enabled: false,
             slack_enabled: false,
             autostart: false,
+            onboarding_done: false,
         }
     }
 }

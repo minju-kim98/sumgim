@@ -13,6 +13,7 @@ export interface AppSettings {
   mattermost_enabled: boolean;
   slack_enabled: boolean;
   autostart: boolean;
+  onboarding_done: boolean;
 }
 
 export interface MessengerCreds {
@@ -72,6 +73,10 @@ export async function quitApp(): Promise<void> {
   return invoke("quit_app");
 }
 
+export async function completeOnboarding(): Promise<AppSettings> {
+  return invoke<AppSettings>("complete_onboarding");
+}
+
 export async function getMessengerCreds(): Promise<MessengerCreds> {
   return invoke<MessengerCreds>("get_messenger_creds");
 }
@@ -96,4 +101,15 @@ export function onMeetingChanged(
 
 export function onUpdateCheckTriggered(cb: () => void): Promise<UnlistenFn> {
   return listen<null>("trigger-update-check", () => cb());
+}
+
+export interface MissedAlertItem {
+  name: string;
+  count: number;
+}
+
+export function onMissedAlerts(
+  cb: (items: MissedAlertItem[]) => void,
+): Promise<UnlistenFn> {
+  return listen<MissedAlertItem[]>("missed-alerts", (event) => cb(event.payload));
 }

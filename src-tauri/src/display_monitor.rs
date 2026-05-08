@@ -18,6 +18,7 @@ use tauri::{AppHandle, Emitter};
 use crate::state::AppState;
 
 pub const EVENT_CLONE_CHANGED: &str = "display-clone-changed";
+pub const EVENT_EXTERNAL_DISPLAY_ATTACHED: &str = "display-external-attached";
 
 /// Report whether the system is in duplicate/clone mode.
 ///
@@ -122,13 +123,22 @@ fn run_message_loop(app: AppHandle) {
     thread_local! {
         static APP_HANDLE: Cell<Option<AppHandle>> = const { Cell::new(None) };
         static LAST_CLONE: Cell<bool> = const { Cell::new(false) };
+        static LAST_MONITOR_COUNT: Cell<i32> = const { Cell::new(0) };
     }
 
     log("display_monitor thread started");
     APP_HANDLE.with(|h| h.set(Some(app.clone())));
     let initial = is_cloning();
     LAST_CLONE.with(|c| c.set(initial));
-    log(&format!("initial clone state = {initial}"));
+    let initial_monitors = unsafe {
+        windows::Win32::UI::WindowsAndMessaging::GetSystemMetrics(
+            windows::Win32::UI::WindowsAndMessaging::SM_CMONITORS,
+        )
+    };
+    LAST_MONITOR_COUNT.with(|c| c.set(initial_monitors));
+    log(&format!(
+        "initial clone state = {initial}, monitor count = {initial_monitors}"
+    ));
 
     unsafe extern "system" fn wnd_proc(
         hwnd: HWND,
@@ -139,11 +149,16 @@ fn run_message_loop(app: AppHandle) {
         if msg == WM_DISPLAYCHANGE {
             log(&format!("WM_DISPLAYCHANGE received (wparam={:?})", wparam.0));
             let current = is_cloning();
+            let current_monitors = unsafe {
+                windows::Win32::UI::WindowsAndMessaging::GetSystemMetrics(
+                    windows::Win32::UI::WindowsAndMessaging::SM_CMONITORS,
+                )
+            };
             LAST_CLONE.with(|c| {
                 let prev = c.get();
                 if prev != current {
                     c.set(current);
-                    log(&format!("state changed {prev} -> {current}, emitting event"));
+                    log(&format!("clone state changed {prev} -> {current}, emitting event"));
                     APP_HANDLE.with(|h| {
                         if let Some(app) = unsafe { &*h.as_ptr() } {
                             match app.emit(EVENT_CLONE_CHANGED, current) {
@@ -155,8 +170,22 @@ fn run_message_loop(app: AppHandle) {
                         }
                     });
                 } else {
-                    log(&format!("state unchanged ({current}), no emit"));
+                    log(&format!("clone state unchanged ({current}), no emit"));
                 }
+            });
+            LAST_MONITOR_COUNT.with(|c| {
+                let prev = c.get();
+                if prev > 0 && current_monitors > prev && !current {
+                    log(&format!(
+                        "monitor count {prev} -> {current_monitors}, not cloning -> external attached"
+                    ));
+                    APP_HANDLE.with(|h| {
+                        if let Some(app) = unsafe { &*h.as_ptr() } {
+                            let _ = app.emit(EVENT_EXTERNAL_DISPLAY_ATTACHED, ());
+                        }
+                    });
+                }
+                c.set(current_monitors);
             });
         }
         DefWindowProcW(hwnd, msg, wparam, lparam)

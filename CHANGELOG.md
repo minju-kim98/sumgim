@@ -7,10 +7,13 @@
 ## [0.3.0] — 2026-05-08
 
 ### Added
+- **최초 실행 온보딩 마법사** (3스텝): 자동 트리거 선택 → MM/Slack 연동 (스킵 가능) → 단축키 안내. `onboarding_done` 플래그로 한 번만 표시
 - **자동 업데이트**: GitHub Releases에서 서명된 빌드를 백그라운드로 다운로드하고 재시작 시 적용 (`tauri-plugin-updater` 기반, minisign 서명 검증)
 - **앱 시작 시 백그라운드 자동 체크**: 실행 30초 후 1회 + 24시간마다 재체크. 새 버전 발견 시 토스트 알림
 - **트레이 메뉴 "업데이트 확인"** 항목
 - **다운로드 진행률 progress bar** (Settings 화면)
+- **외부 디스플레이 연결 제안 토스트**: 복제는 아니지만 모니터 수가 늘어났을 때 회의 모드를 켤지 단축키 안내 토스트 표시 (PRD 4.1)
+- **놓친 알림 인앱 카드 + [열기] 버튼**: 회의 종료 시 main window 자동 표시, Mattermost/Slack 데스크톱 앱 또는 웹으로 바로 점프 (`tauri-plugin-shell`)
 - **GitHub Actions 릴리스 워크플로**: 태그 푸시 (`v*`) 또는 수동 트리거 시 Windows MSI/EXE를 자동 빌드하고 Draft Release로 업로드. `latest.json`도 함께 첨부되어 자동 업데이트 엔드포인트 역할
 
 ### Changed
