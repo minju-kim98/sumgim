@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"python -c \\\"import yaml,sys; d=yaml.safe_load(open('.github/workflows/release.yml',encoding='utf-8')); print('OK | jobs:', list(d['jobs'].keys()), '| triggers:', list(d['on'].keys()), '| s...",
+  "error": "Exit code 1\nTraceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\nKeyError: 'on'\r\nTraceback (most recent call last):\r\n  File \"<string>\", line 1, in <module>\r\n    import yaml,sys; d=yaml.safe_load(open('.github/workflows/release.yml',encoding='utf-8')); print('OK | jobs:', list(d['jobs'].keys()), '| triggers:', list(d['on'].keys()), '| steps:', len(d['jobs']['build']['steps']))\r\n    ^^^^^^^^^^^^^^^\r\nModuleNotFoundError: No module named 'yaml'",
+  "timestamp": "2026-05-08T07:01:23.848Z",
+  "retry_count": 1
+}

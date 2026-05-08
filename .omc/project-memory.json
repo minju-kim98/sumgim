@@ -1,0 +1,213 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1778212542581,
+  "projectRoot": "D:\\development\\personal\\sumgim",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "vite",
+        "version": "5.4.10",
+        "category": "build"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "vite",
+      "build": "tsc && vite build",
+      "preview": "vite preview",
+      "tauri": "tauri"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "src"
+    ],
+    "gitBranches": null
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "dist": {
+      "path": "dist",
+      "purpose": "Distribution/build output",
+      "fileCount": 1,
+      "lastAccessed": 1778212542498,
+      "keyFiles": [
+        "index.html"
+      ]
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 4,
+      "lastAccessed": 1778212542522,
+      "keyFiles": [
+        "App.css",
+        "App.tsx",
+        "main.tsx",
+        "vite-env.d.ts"
+      ]
+    },
+    "src-tauri": {
+      "path": "src-tauri",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1778212542524,
+      "keyFiles": [
+        "build.rs",
+        "Cargo.lock",
+        "Cargo.toml",
+        "tauri.conf.json"
+      ]
+    },
+    "dist\\assets": {
+      "path": "dist\\assets",
+      "purpose": "Static assets",
+      "fileCount": 3,
+      "lastAccessed": 1778212542526,
+      "keyFiles": [
+        "index-D9HTzYJT.js",
+        "index-VGvn9den.css",
+        "logo-ENeYSQDu.png"
+      ]
+    },
+    "src\\assets": {
+      "path": "src\\assets",
+      "purpose": "Static assets",
+      "fileCount": 1,
+      "lastAccessed": 1778212542528,
+      "keyFiles": [
+        "logo.png"
+      ]
+    },
+    "src\\lib": {
+      "path": "src\\lib",
+      "purpose": "Library code",
+      "fileCount": 1,
+      "lastAccessed": 1778212542529,
+      "keyFiles": [
+        "api.ts"
+      ]
+    },
+    "src\\pages": {
+      "path": "src\\pages",
+      "purpose": "Page components",
+      "fileCount": 2,
+      "lastAccessed": 1778212542531,
+      "keyFiles": [
+        "FloatingToggle.tsx",
+        "Settings.tsx"
+      ]
+    },
+    "src-tauri\\src": {
+      "path": "src-tauri\\src",
+      "purpose": "Source code",
+      "fileCount": 12,
+      "lastAccessed": 1778212542533,
+      "keyFiles": [
+        "commands.rs",
+        "display_monitor.rs",
+        "dnd.rs"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "package.json",
+      "accessCount": 1,
+      "lastAccessed": 1778212549650,
+      "type": "file"
+    },
+    {
+      "path": "README.md",
+      "accessCount": 1,
+      "lastAccessed": 1778212562103,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\tauri.conf.json",
+      "accessCount": 1,
+      "lastAccessed": 1778212565118,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\Cargo.toml",
+      "accessCount": 1,
+      "lastAccessed": 1778212565145,
+      "type": "file"
+    },
+    {
+      "path": "",
+      "accessCount": 1,
+      "lastAccessed": 1778223581114,
+      "type": "directory"
+    },
+    {
+      "path": "src-tauri\\src\\messenger.rs",
+      "accessCount": 1,
+      "lastAccessed": 1778223587279,
+      "type": "file"
+    },
+    {
+      "path": "src-tauri\\src\\commands.rs",
+      "accessCount": 1,
+      "lastAccessed": 1778223589614,
+      "type": "file"
+    },
+    {
+      "path": "src\\pages\\Settings.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1778223589813,
+      "type": "file"
+    },
+    {
+      "path": "src\\lib\\api.ts",
+      "accessCount": 1,
+      "lastAccessed": 1778223589875,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}
