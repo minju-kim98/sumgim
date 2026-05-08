@@ -46,4 +46,4 @@ src-tauri/       Rust 백엔드 (Win32 DND, 디스플레이 모니터, 트레이
 - 놓친 알림 요약 토스트
 - 앱별 화이트/블랙리스트
 
-GitHub: _(placeholder — add repository URL after publish)_
+GitHub: https://github.com/minju-kim98/sumgim.git
