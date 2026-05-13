@@ -4,6 +4,11 @@
 형식은 [Keep a Changelog](https://keepachangelog.com/ko/1.1.0/)를 따르고,
 버저닝은 [SemVer](https://semver.org/lang/ko/)를 따릅니다.
 
+## [0.4.1] — 2026-05-13
+
+### Fixed
+- **릴리스 빌드 초기 race**: webview가 `setup()`의 `load_settings`보다 먼저 mount되어 `get_settings` / `get_messenger_creds`가 default값을 반환하던 race를 해소. 매 호출 시점에 디스크에서 inline hydrate (idempotent). 증상은 부팅 후 매번 온보딩 튜토리얼이 다시 뜨고 Mattermost/Slack 토큰 칸이 비어 보이던 것
+
 ## [0.4.0] — 2026-05-08
 
 ### Added — PRD MVP 완성
@@ -45,6 +50,7 @@
 - Windows 시작 프로그램 등록
 - 설정 영속화 (`tauri-plugin-store`) + 크래시 복구
 
+[0.4.1]: https://github.com/minju-kim98/sumgim/releases/tag/v0.4.1
 [0.4.0]: https://github.com/minju-kim98/sumgim/releases/tag/v0.4.0
 [0.3.0]: https://github.com/minju-kim98/sumgim/releases/tag/v0.3.0
 [0.2.0]: https://github.com/minju-kim98/sumgim/releases/tag/v0.2.0
