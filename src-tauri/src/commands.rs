@@ -38,7 +38,12 @@ pub struct SettingsPatch {
 }
 
 #[tauri::command]
-pub fn get_settings(state: State<'_, Arc<AppState>>) -> AppSettings {
+pub fn get_settings(app: AppHandle, state: State<'_, Arc<AppState>>) -> AppSettings {
+    // Webview can mount and invoke this before setup()'s load_settings finishes
+    // (release builds race the setup callback). Hydrate from disk inline so we
+    // never serve uninitialized defaults. Idempotent: re-running just merges
+    // the on-disk state into the in-memory cache.
+    let _ = load_settings(&app, state.inner());
     state.settings.read().clone()
 }
 
@@ -91,7 +96,9 @@ pub fn update_settings(
 }
 
 #[tauri::command]
-pub fn get_messenger_creds(state: State<'_, Arc<AppState>>) -> MessengerCreds {
+pub fn get_messenger_creds(app: AppHandle, state: State<'_, Arc<AppState>>) -> MessengerCreds {
+    // Same race as get_settings — hydrate inline.
+    let _ = load_settings(&app, state.inner());
     state.messenger_creds.read().clone()
 }
 
